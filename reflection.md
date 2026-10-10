@@ -2,70 +2,54 @@
 
 ## 1. System Design
 
-**a. Initial design**
+### a. Initial design
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+The system uses four core classes. `Owner` manages a household and preferences; `Pet` stores identity details and its task list; `Task` represents one dated care activity; and `Scheduler` is the coordination layer that queries tasks across all pets. The three essential actions are adding a pet, scheduling a care task, and viewing a prioritized daily plan.
 
-**b. Design changes**
+### b. Design changes
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
-
----
+The final `Task` gained `due_date`, `duration_minutes`, `priority`, and `frequency`. These fields make a task usable for daily planning instead of just being a label and time. Persistence was kept outside the model as `save_to_json`/`load_from_json`, preserving a clean separation between domain behavior and file I/O.
 
 ## 2. Scheduling Logic and Tradeoffs
 
-**a. Constraints and priorities**
+### a. Constraints and priorities
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler considers date, completion state, pet, time, priority, recurrence, and duration. The primary plan ranks priority before time so medication and other urgent care cannot be hidden below routine tasks; a chronological view is also available for an actual timeline.
 
-**b. Tradeoffs**
+### b. Tradeoffs
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
-
----
+Conflict detection treats only identical start times as conflicts. This rule is simple, transparent, and inexpensive, but it does not warn about partially overlapping intervals. The next-slot algorithm does use duration, which supplies a practical stepping stone toward richer overlap handling.
 
 ## 3. AI Collaboration
 
-**a. How you used AI**
+### a. How AI was used
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+AI support was used to turn the scenario into a class model, propose Mermaid notation, scaffold dataclasses, and outline test cases. Prompts around recurrence and sorting helped focus on Python's `timedelta` and sorted key functions.
 
-**b. Judgment and verification**
+### b. Judgment and verification
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
-
----
+An overly clever scheduling approach that mixed persistence, UI state, and business rules was avoided. Persistence is intentionally isolated and every algorithm was verified by a test or the CLI demo rather than trusting generated code without execution.
 
 ## 4. Testing and Verification
 
-**a. What you tested**
+### a. What was tested
 
-- What behaviors did you test?
-- Why were these tests important?
+Tests cover status changes, task addition, chronological sorting, filtering, recurring task creation, conflict warnings, and JSON round-tripping. These validate both basic model integrity and the scheduling behaviors a user relies on.
 
-**b. Confidence**
+### b. Confidence
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
-
----
+Confidence level: ★★★★☆ (4/5). Core paths pass automatically. Future tests should cover invalid input in the UI, interval-overlap warnings, multiple recurrence completions, and a larger household with many tasks.
 
 ## 5. Reflection
 
-**a. What went well**
+### a. What went well
 
-- What part of this project are you most satisfied with?
+The logic stays compact because dataclasses map naturally to the real-world objects, while `Scheduler` keeps cross-pet algorithms in one discoverable place.
 
-**b. What you would improve**
+### b. What could improve
 
-- If you had another iteration, what would you improve or redesign?
+A future version should support editing/deleting tasks, calendar integrations, and full overlap detection with user-configurable buffers.
 
-**c. Key takeaway**
+### c. Key takeaway
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+Good AI collaboration begins with a clear model and ends with human review plus executable verification; generated code is a starting point, not proof of correctness.

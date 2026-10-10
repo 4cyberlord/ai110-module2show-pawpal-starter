@@ -1,94 +1,86 @@
-# PawPal+ (Module 2 Project)
+# PawPal+
 
-You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+PawPal+ is a Streamlit pet-care planner that keeps a household's feedings, walks, medication, and appointments organized. It uses a modular Python OOP backend and a stateful browser interface.
 
-## Scenario
+## Features
 
-A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
+- Add an owner, pets, and dated care tasks in the UI.
+- Keep data alive during the Streamlit session and optionally save/load it locally as JSON.
+- Sort a daily schedule chronologically or prioritize urgent care first.
+- Filter tasks by pet or completion status.
+- Flag exact duplicate start times as lightweight conflict warnings.
+- Complete daily or weekly tasks and automatically create their next occurrence.
+- Find the next available 15-minute slot from task durations.
 
-- Track pet care tasks (walks, feeding, meds, enrichment, grooming, etc.)
-- Consider constraints (time available, priority, owner preferences)
-- Produce a daily plan and explain why it chose that plan
-
-Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
-
-## What you will build
-
-Your final app should:
-
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
-
-## Getting started
-
-### Setup
+## Setup and run
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+streamlit run app.py
 ```
 
-### Suggested workflow
-
-1. Read the scenario carefully and identify requirements and edge cases.
-2. Draft a UML diagram (classes, attributes, methods, relationships).
-3. Convert UML into Python class stubs (no logic yet).
-4. Implement scheduling logic in small increments.
-5. Add tests to verify key behaviors.
-6. Connect your logic to the Streamlit UI in `app.py`.
-7. Refine UML so it matches what you actually built.
-
-## 🖥️ Sample Output
-
-Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
-
-```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
-```
-
-## 🧪 Testing PawPal+
+## CLI demo
 
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+python main.py
 ```
 
-Sample test output:
+Sample output:
 
+```text
+PawPal+ daily plan for Jordan
+============================================================
+07:30 | Mochi  | Breakfast          |  10 min | 🔴 high
+08:00 | Mochi  | Morning walk       |  30 min | 🔴 high
+08:00 | Luna   | Give medication    |   5 min | 🔴 high
+18:00 | Luna   | Play session       |  20 min | 🟡 medium
+
+Conflict warnings:
+⚠️  Conflict at 08:00: Mochi — Morning walk, Luna — Give medication
 ```
-# Paste your pytest output here
+
+## Smarter scheduling
+
+| Feature | Method | Behavior |
+|---|---|---|
+| Time sorting | `Scheduler.sort_by_time()` | Orders tasks chronologically using parsed `HH:MM` times. |
+| Filtering | `Scheduler.filter_tasks()` | Narrows a day's tasks by pet name and/or completion status. |
+| Priority plan | `Scheduler.prioritized_schedule()` | Ranks high, medium, then low priority; ties use time. |
+| Conflicts | `Scheduler.detect_conflicts()` | Returns warnings when two open tasks start at the exact same time. |
+| Recurrence | `Scheduler.complete_task()` | Completes the original and adds the next daily or weekly occurrence. |
+| Available slot | `Scheduler.next_available_slot()` | Finds a free 15-minute start time, accounting for duration. |
+
+The conflict rule intentionally checks exact starts rather than all interval overlaps. It is fast and easy to explain in a lightweight care planner; the available-slot helper does account for occupied durations.
+
+## Data persistence
+
+The sidebar's **Save household** button writes `pawpal_data.json`; **Load saved household** restores it. The backend uses `save_to_json()` and `load_from_json()` with explicit dataclass-to-dictionary conversion, so dates remain valid ISO date values.
+
+## Testing PawPal+
+
+```bash
+python -m pytest
 ```
 
-## 📐 Smarter Scheduling
+The suite covers completion, adding tasks, chronological sorting, filtering, daily recurrence, duplicate-time conflicts, and JSON persistence.
 
-> Fill in once you've implemented scheduling logic.
+Successful run:
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+```text
+7 passed in 0.02s
+```
 
-## 📸 Demo Walkthrough
+## Demo walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+1. Open the **Add a pet** tab and create each pet in the household.
+2. Use **Schedule a task** to select a pet, add a time, duration, priority, frequency, and date.
+3. Open **Today's plan** to see open tasks ordered by priority, then time.
+4. Review any duplicate-time warning and the next available slot.
+5. Select **Complete** to mark the task done; recurring tasks automatically receive their next due date.
+6. Use the sidebar to save the household locally or restore it in a later session.
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+## Design
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
+The final class diagram is in [diagrams/uml.mmd](diagrams/uml.mmd). `Owner` owns `Pet` objects, each `Pet` owns `Task` objects, and `Scheduler` organizes an owner's tasks without duplicating data.

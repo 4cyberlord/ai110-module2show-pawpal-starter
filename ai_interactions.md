@@ -1,40 +1,17 @@
-# AI Interactions Log
+# AI Interaction Record
 
-> **Stretch features only.** Only fill in the sections that apply to stretch features you attempted. If you did not attempt a stretch feature, leave its section blank or delete it. This file is not required for the core project.
+## Design and implementation workflow
 
----
+| Stage | Prompt or task | Files changed | Outcome and review |
+|---|---|---|---|
+| Architecture | Design a small OOP pet-care system with Owner, Pet, Task, and Scheduler. | `diagrams/uml.mmd`, `pawpal_system.py` | Produced a focused composition model: Owner → Pet → Task, with Scheduler referencing Owner. |
+| Algorithms | Add readable sorting, filtering, recurrence, conflict detection, and an available-slot helper. | `pawpal_system.py`, `main.py` | Chose exact-time conflict warnings for readability; duration-aware logic is used for next-slot calculation. |
+| Interface | Connect Streamlit forms to the model while preserving state. | `app.py` | Stored the Owner object in `st.session_state`; added optional JSON save/load. |
+| Verification | Draft tests for model behavior and scheduling edge cases. | `tests/test_pawpal.py` | Tests were executed with `python -m pytest`; code was adjusted until the suite passed. |
 
-## Agent Workflow (SF7)
+## Prompt comparison
 
-> Document your experience using an AI agent (e.g., Cursor Agent, Claude, Copilot) to make multi-step changes autonomously.
-
-**What task did you give the agent?**
-
-<!-- Describe the goal you asked the agent to accomplish -->
-
-**What did the agent do?**
-
-<!-- List the steps the agent took (files edited, commands run, etc.) -->
-
-**What did you have to verify or fix manually?**
-
-<!-- Describe anything the agent got wrong or that required human review -->
-
----
-
-## Prompt Comparison (SF11)
-
-> Compare two different prompts (or two different models) on the same task.
-
-| | Option A | Option B |
-|-|----------|----------|
-| **Model / tool used** | | |
-| **Prompt** | | |
-| **Response summary** | | |
-| **What was useful** | | |
-| **Problems noticed** | | |
-| **Decision** | | |
-
-**Which approach did you use in your final implementation and why?**
-
-<!-- Your conclusion -->
+| Model/tool approach | Task | Useful output | Limitation | Final decision |
+|---|---|---|---|---|
+| AI-generated recurrence approach | Reschedule daily and weekly tasks after completion. | Suggested `timedelta`, which keeps date arithmetic correct across month boundaries. | A direct mutation approach could lose completion history. | Preserve the completed original and append a new `Task` instance for the next date. |
+| Manual review | Decide conflict behavior. | Confirmed exact-time grouping is clear for an introductory project. | Does not identify every overlap. | Keep exact-time warnings and document the limitation; provide a duration-aware next-slot helper as an extension. |
